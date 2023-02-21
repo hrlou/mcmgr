@@ -1,5 +1,18 @@
-[workspace]
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-members = [
-    "mcmgr-cli",
-]
+[package]
+name = "mcmgr-cli"
+version = "0.1.0"
+authors = [ "Hess Lewis <hrl@hrlou.net>" ]
+edition = "2021"
+description = "Minecraft Server Manager"
+homepage = "https://git.hrlou.net/hrlou/mcmgr"
+keywords = [ "minecraft", "manager", "server", "java" ]
+
+[dependencies]
+clap = "4.1.6"
+env_logger = "0.10.0"
+log = "0.4.17" 
+
+[workspace]
+members = [ "mcmgr-core", "mcmgr-daemon" ]

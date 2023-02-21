@@ -150,6 +150,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "mcmgr-core"
+version = "0.1.0"
+
+[[package]]
+name = "mcmgr-daemon"
+version = "0.1.0"
+
+[[package]]
 name = "memchr"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
