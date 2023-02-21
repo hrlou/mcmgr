@@ -1,5 +1,4 @@
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [package]
 name = "mcmgr-cli"
 version = "0.1.0"
@@ -13,6 +12,7 @@ keywords = [ "minecraft", "manager", "server", "java" ]
 clap = "4.1.6"
 env_logger = "0.10.0"
 log = "0.4.17" 
+nix = "0.26.2"
 
 [workspace]
 members = [ "mcmgr-core", "mcmgr-daemon" ]
