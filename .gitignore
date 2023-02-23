@@ -1,2 +1,6 @@
-/target
-/server
+debug/
+target/
+Cargo.lock
+**/*.rs.bk
+*.pdb
+server/
