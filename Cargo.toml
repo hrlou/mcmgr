@@ -1,6 +1,9 @@
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[env]
+RUST_LOG="debug"
+
 [package]
-name = "mcmgr-cli"
+name = "mcmgr"
 version = "0.1.0"
 authors = [ "Hess Lewis <hrl@hrlou.net>" ]
 edition = "2021"
@@ -9,10 +12,11 @@ homepage = "https://git.hrlou.net/hrlou/mcmgr"
 keywords = [ "minecraft", "manager", "server", "java" ]
 
 [dependencies]
+anyhow = "1.0.69"
 clap = "4.1.6"
+derive_builder = "0.12.0"
 env_logger = "0.10.0"
 log = "0.4.17" 
-nix = "0.26.2"
 
 [workspace]
 members = [ "mcmgr-core", "mcmgr-daemon" ]
