@@ -1,4 +1,4 @@
-use super::prelude::*;
+use crate::prelude::*;
 
 pub struct Instance {
     path: PathBuf,
@@ -8,6 +8,12 @@ pub struct Instance {
 }
 
 impl Instance {
+    /// Initialise the server instance
+    /// 
+    /// Example
+    /// ```rs
+    /// let
+    /// ```
     pub fn init<P, S, V>(path: P, java: S, jar: S, jvm: V) -> Result<Instance>
     where
         P: AsRef<Path>,
@@ -64,6 +70,10 @@ impl Instance {
         Ok(())
     }
 
+    /// Execute a command on the server instance
+    /// 
+    /// ```rs
+    /// 
     pub fn execute<S: AsRef<OsStr>>(&mut self, s: S) -> Result<()> {
         // let process = self.process.as_mut().context("process isn't running")?;
         // let stdin = process.stdin.as_mut().context("cannot read stdout")?;

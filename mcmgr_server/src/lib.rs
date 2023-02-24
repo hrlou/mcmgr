@@ -7,7 +7,9 @@ pub mod prelude {
         process::{Child, Command, Stdio},
         vec,
     };
+
+    pub use crate::*;
 }
 
-pub mod instance;
+mod instance;
 pub use instance::Instance;

@@ -1,5 +1,5 @@
 [package]
-name = "mcmgr-daemon"
+name = "mcmgr_daemon"
 version = "0.1.0"
 edition = "2021"
 
