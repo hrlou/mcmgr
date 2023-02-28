@@ -2,14 +2,13 @@ pub mod prelude {
     pub use anyhow::{Context, Result};
     pub use std::{
         ffi::{OsStr, OsString},
-        io::{BufRead, BufReader},
+        io::{BufRead, BufReader, BufWriter},
         path::{Path, PathBuf},
         process::{Child, Command, Stdio},
         vec,
     };
-
-    pub use crate::*;
 }
 
 mod instance;
+mod event;
 pub use instance::Instance;

@@ -1,4 +1,7 @@
+use std::io::Write;
+
 use crate::prelude::*;
+pub use crate::*;
 
 pub struct Instance {
     path: PathBuf,
@@ -7,27 +10,38 @@ pub struct Instance {
     pub process: Option<Box<Child>>,
 }
 
+macro_rules! unwrap_log {
+    ($kind:expr, $e:expr) => {
+        match $kind {
+            "ERROR" => log::error!($e),
+            "WARN" => log::warn!($e),
+            "DEBUG" => log::debug!($e),
+            _ => log::info!($e),
+        }
+    };
+}
+
 impl Instance {
-    /// Initialise the server instance
+    /// Creates a new minecraft server instance
     /// 
-    /// Example
-    /// ```rs
-    /// let
+    /// ```rust
+    /// let server = Instance::new("./server", "/usr/bin/java", "server.jar", vec!["nogui"]);
     /// ```
-    pub fn init<P, S, V>(path: P, java: S, jar: S, jvm: V) -> Result<Instance>
+    /// 
+    pub fn new<P, S, V>(path: P, java: S, jar: S, jvm: V) -> Result<Instance>
     where
-        P: AsRef<Path>,
-        S: AsRef<OsStr>,
-        V: AsRef<Vec<S>>,
+        P: Into<PathBuf>,
+        S: Into<OsString>,
+        V: Into<Vec<S>>,
     {
-        // Convert reference to PathBuf
-        let path = path.as_ref().to_path_buf();
-        let java = java.as_ref().to_os_string();
+        // Convert into
+        let (path, java, jar, jvm) = (path.into(), java.into(), jar.into(), jvm.into());
+        // Add path check~
         // Create arguments
-        let mut args: Vec<OsString> = vec!["-jar".into(), jar.as_ref().into()];
+        let mut args: Vec<OsString> = vec!["-jar".into(), jar];
         // There's probably a better way to do this
-        for arg in jvm.as_ref() {
-            let arg = arg.as_ref().to_os_string();
+        for arg in jvm {
+            let arg = arg.into();
             args.push(arg)
         }
         Ok(Instance {
@@ -48,35 +62,46 @@ impl Instance {
                 .stderr(Stdio::piped())
                 .spawn()?,
         ));
-        self.stdout()?;
+        let process = self.process.as_mut().context("process isn't running")?;
+        let stdout = process.stdout.take().context("cannot access stdout")?;
+        std::thread::spawn(move || -> Result<()> {
+            let buf_reader = BufReader::new(stdout);
+            for l in buf_reader.lines() {
+                let l = l.context("line cannot be read")?;
+                Self::process_line(l);
+            }
+            Ok(())
+        });
         Ok(())
     }
 
     /// Process a line from the minecraft server
     fn process_line(l: String) {
-        log::info!("{}", l);
-    }
-
-
-    /// Reads the stdout of the minecraft server
-    fn stdout(&mut self) -> Result<()> {
-        let process = self.process.as_mut().context("process isn't running")?;
-        let stdout = process.stdout.as_mut().context("cannot read stdout")?;
-        let buf_reader = BufReader::new(stdout);
-        for l in buf_reader.lines() {
-            let l = l.context("line cannot be read")?;
-            Self::process_line(l);
+        let re = regex::Regex::new(r"(\[(?P<time>[0-9:]+)?\])? ?(\[(?P<from>.*)/(?P<kind>[A-Z]+)?\]: )? ?(?P<msg>.*)").unwrap();
+        let l = re.captures(&l).unwrap();
+        let target = match l.name("from") {
+            Some(x) => x.as_str(),
+            _ => "server",
+        };
+        let kind = match l.name("kind") {
+            Some(x) => x.as_str(),
+            _ => "INFO",
+        };
+        match kind {
+            "ERROR" => log::error!(target: target, "{}", &l["msg"]),
+            "WARN" => log::warn!(target: target, "{}", &l["msg"]),
+            "DEBUG" => log::debug!(target: target, "{}", &l["msg"]),
+            _ => log::info!(target: target, "{}", &l["msg"]),
         }
-        Ok(())
     }
 
     /// Execute a command on the server instance
-    /// 
-    /// ```rs
-    /// 
-    pub fn execute<S: AsRef<OsStr>>(&mut self, s: S) -> Result<()> {
-        // let process = self.process.as_mut().context("process isn't running")?;
-        // let stdin = process.stdin.as_mut().context("cannot read stdout")?;
+    pub fn execute<S: Into<Vec<u8>>>(&mut self, s: S) -> Result<()> {
+        let s = s.into();
+        let process = self.process.as_mut().context("process isn't running")?;
+        let mut stdin = process.stdin.take().context("cannot access stdin")?;
+        log::debug!("Writing to process: {:?}", s);
+        stdin.write(&s)?;
         Ok(())
     }
 }
